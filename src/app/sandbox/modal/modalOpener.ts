@@ -1,4 +1,4 @@
-import { Injector, Injectable, ComponentResolver, ReflectiveInjector, ComponentFactory, ComponentRef } from '@angular/core';
+import { Injector, Injectable, ComponentResolver, ReflectiveInjector, ViewContainerRef} from '@angular/core';
 import ModalOptions from './modalOptions';
 import ModalComponent from './modalComponent';
 import DialogRef from './dialog-ref';
@@ -7,6 +7,9 @@ import { Observable, Subject } from 'rxjs/Rx';
 
 @Injectable()
 export default class ModalOpener {
+    
+    public defaultViewContainer: ViewContainerRef;
+    
 
     constructor(private componentResolver : ComponentResolver, private injector : Injector) {}
 
@@ -31,8 +34,11 @@ export default class ModalOpener {
         const modalInjector = ReflectiveInjector.fromResolvedProviders(bindings, this.injector);
 
         this.componentResolver.resolveComponent(ModalComponent).then( (factory) => {
-            let modalPopinRef = factory.create(modalInjector, null, null);
-            document.body.appendChild(modalPopinRef.location.nativeElement);
+
+            this.defaultViewContainer.createComponent(factory, this.defaultViewContainer.length, modalInjector);
+
+            //let modalPopinRef = factory.create(modalInjector, null, null);
+            //document.body.appendChild(modalPopinRef.location.nativeElement);
         });
 
         window.setTimeout(() => {
