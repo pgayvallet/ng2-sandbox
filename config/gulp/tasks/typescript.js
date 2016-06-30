@@ -74,11 +74,13 @@ function compileTs(files, watchMode) {
             base: config.src,
             outDir: config.tmp
         })
+        /*
         .pipe(tslint())
         .pipe(tslint.report('prose', {
             summarizeFailureOutput: true,
             emitError: !watchMode
         }))
+        */
         .pipe(sourcemaps.init())
         .pipe(ts(tsProject))
         .on('error', function () {
