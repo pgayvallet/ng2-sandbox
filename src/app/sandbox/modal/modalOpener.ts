@@ -3,28 +3,23 @@ import ModalOptions from './modalOptions';
 import ModalComponent from './modalComponent';
 import DialogRef from './dialog-ref';
 
-import { Observable, Subject } from 'rxjs/Rx';
+// import { Observable, Subject } from 'rxjs/Rx';
 
 @Injectable()
 export default class ModalOpener {
-    
-    public defaultViewContainer: ViewContainerRef;
-    
 
-    constructor(private componentResolver : ComponentResolver, private injector : Injector) {}
+    private _dialogStack: DialogRef[] = [];
+
+    // This is required to be injected before use, as there is no way to access the root element view container ref otherwise.
+    public defaultViewContainer: ViewContainerRef;
+
+    constructor(private componentResolver : ComponentResolver,
+                private injector : Injector) {
+    }
 
     openConfirm(options : ModalOptions) : Promise<boolean> {
 
-        console.log("openConfirm -> "  + options.title, options.componentType);
-
-        let emitter : Subject<boolean> = new Subject<boolean>();
-
-        //Observable.
-        //emitter.next(false);
-        //emitter.complete();
-        
         let dialogRef = new DialogRef();
-
         let bindings = ReflectiveInjector.resolve([
             {provide: ModalOpener, useValue: this},
             {provide: DialogRef, useValue: dialogRef},
@@ -33,26 +28,22 @@ export default class ModalOpener {
         ]);
         const modalInjector = ReflectiveInjector.fromResolvedProviders(bindings, this.injector);
 
-        this.componentResolver.resolveComponent(ModalComponent).then( (factory) => {
-
-            this.defaultViewContainer.createComponent(factory, this.defaultViewContainer.length, modalInjector);
-
-            //let modalPopinRef = factory.create(modalInjector, null, null);
-            //document.body.appendChild(modalPopinRef.location.nativeElement);
+        return this.componentResolver.resolveComponent(ModalComponent).then( (factory) => {
+            let modalRef = this.defaultViewContainer.createComponent(factory, this.defaultViewContainer.length, modalInjector);
+            dialogRef.modalRef = modalRef;
+            this._dialogStack.push(dialogRef);
+            dialogRef.onDestroy.subscribe(() => {
+                this._onDialogDestroy(dialogRef);
+            });
+        }).then( () => {
+           return dialogRef.promise;
         });
-
-        window.setTimeout(() => {
-           emitter.next(true);
-            //emitter.complete();
-        }, 200);
-        
-
-
-
-
-        return emitter.toPromise();
     }
 
+    
+    private _onDialogDestroy(dialogRef : DialogRef) : void {
+        
+    }
 
     /*
     openModal(options : ModalOptions) {
