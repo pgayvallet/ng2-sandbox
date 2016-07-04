@@ -4,6 +4,8 @@ import {disableDeprecatedForms, provideForms} from '@angular/forms';
 import {AppComponent} from './app.component';
 import {APP_ROUTER_PROVIDERS} from './app.routes';
 
+import ComponentUtils from './sandbox/utils/ComponentUtils';
+
 declare var ENV: string;
 
 if (ENV === 'production') {
@@ -13,5 +15,6 @@ if (ENV === 'production') {
 bootstrap(AppComponent, [
     disableDeprecatedForms(),
     provideForms(),
-    APP_ROUTER_PROVIDERS
+    APP_ROUTER_PROVIDERS,
+    ComponentUtils
 ]);

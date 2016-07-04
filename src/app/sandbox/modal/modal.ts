@@ -1,4 +1,4 @@
-import { Type, Injector, Injectable, ComponentResolver, ReflectiveInjector, ViewContainerRef} from '@angular/core';
+import { Type, Injector, Injectable, ReflectiveInjector, ViewContainerRef} from '@angular/core';
 import ModalSettings from './modal-settings';
 import ModalComponent from './modalComponent';
 import DialogRef from './dialog-ref';
@@ -7,6 +7,7 @@ import ConfirmDialogOptions from "./confirm-dialog-options";
 import ModalOpenContext from "./modal-open-context";
 import AlertDialogComponent from "./alert-dialog-component";
 import ConfirmDialogComponent from "./confirm-dialog-component";
+import ComponentUtils from "../utils/ComponentUtils";
 
 // import { Observable, Subject } from 'rxjs/Rx';
 
@@ -17,13 +18,13 @@ import ConfirmDialogComponent from "./confirm-dialog-component";
  */
 @Injectable()
 export default class Modal {
-
+    
     private _dialogStack: DialogRef<any>[] = [];
 
     // This is required to be injected before use, as there is no way to access the root element view container ref otherwise.
     public defaultViewContainer: ViewContainerRef;
 
-    constructor(private componentResolver : ComponentResolver,
+    constructor(private componentUtils : ComponentUtils,
                 private injector : Injector) {
     }
 
@@ -77,10 +78,9 @@ export default class Modal {
         ]);
         const modalInjector = ReflectiveInjector.fromResolvedProviders(bindings, this.injector);
 
-        this.componentResolver.resolveComponent(ModalComponent).then( (factory) => {
-            let modalRef = this.defaultViewContainer.createComponent(factory, this.defaultViewContainer.length, modalInjector);
+        this.componentUtils.instanciate(ModalComponent, this.defaultViewContainer, modalInjector).then(modalRef => {
             dialogRef.modalRef = modalRef;
-            this._dialogStack.push(dialogRef);
+            this._onDialogAdd(dialogRef);
             dialogRef.onDestroy.subscribe(() => {
                 this._onDialogDestroy(dialogRef);
             });
@@ -88,10 +88,28 @@ export default class Modal {
 
         return dialogRef;
     }
+
+    private _onDialogAdd(dialogRef : DialogRef<any>) : void {
+        this._dialogStack.push(dialogRef);
+        if(this._dialogStack.length === 1) {
+            
+        }
+
+    }
     
     private _onDialogDestroy(dialogRef : DialogRef<any>) : void {
         console.log("on dialog destroy !")
         
     }
+
+    private _showOverlay() : void{
+
+    }
+
+    private _removeOverlay() : void {
+        
+    }
+
+
     
 }

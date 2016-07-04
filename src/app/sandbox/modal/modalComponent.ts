@@ -1,7 +1,8 @@
-import {Component,ViewChild, ViewContainerRef, ComponentResolver, AfterViewInit} from '@angular/core';
+import {Component, ViewChild, ViewContainerRef, AfterViewInit} from '@angular/core';
 import DialogRef from './dialog-ref';
 import ModalSettings from './modal-settings';
 import ModalOpenContext from "./modal-open-context";
+import ComponentUtils from "../utils/ComponentUtils";
 
 @Component({
     selector: 'modal-container',
@@ -10,7 +11,7 @@ import ModalOpenContext from "./modal-open-context";
         <div #dialogContent></div>
     `,
     directives: [],
-    providers : []
+    providers : [ComponentUtils]
 })
 export default class ModalContainer implements AfterViewInit {
 
@@ -19,18 +20,13 @@ export default class ModalContainer implements AfterViewInit {
     constructor(private openContext : ModalOpenContext<any>,
                 private dialog      : DialogRef<any>,
                 private settings    : ModalSettings,
-                private _cr         : ComponentResolver) {
+                private componentUtils : ComponentUtils) {
         console.log("constructor !");
     }
 
     ngAfterViewInit() {
-        console.log("after view init !");
-        this._cr.resolveComponent(this.openContext.componentType).then(factory => {
-
-            console.log("after factory init !");
-
-            let contentRef = this._viewContainer.createComponent(factory, this._viewContainer.length, this._viewContainer.parentInjector);
-            this.dialog.contentRef = contentRef;
+        this.componentUtils.instanciate(this.openContext.componentType, this._viewContainer).then(componentRef => {
+           this.dialog.contentRef = componentRef;
         });
     }
 

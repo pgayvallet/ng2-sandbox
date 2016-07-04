@@ -15,6 +15,7 @@ var dialog_ref_1 = require('./dialog-ref');
 var modal_open_context_1 = require("./modal-open-context");
 var alert_dialog_component_1 = require("./alert-dialog-component");
 var confirm_dialog_component_1 = require("./confirm-dialog-component");
+var ComponentUtils_1 = require("../utils/ComponentUtils");
 // import { Observable, Subject } from 'rxjs/Rx';
 /**
  * Modal service.
@@ -22,8 +23,8 @@ var confirm_dialog_component_1 = require("./confirm-dialog-component");
  * Allow to open modal popin
  */
 var Modal = (function () {
-    function Modal(componentResolver, injector) {
-        this.componentResolver = componentResolver;
+    function Modal(componentUtils, injector) {
+        this.componentUtils = componentUtils;
         this.injector = injector;
         this._dialogStack = [];
     }
@@ -74,22 +75,30 @@ var Modal = (function () {
             { provide: modal_settings_1.default, useValue: new modal_settings_1.default() }
         ]);
         var modalInjector = core_1.ReflectiveInjector.fromResolvedProviders(bindings, this.injector);
-        this.componentResolver.resolveComponent(modalComponent_1.default).then(function (factory) {
-            var modalRef = _this.defaultViewContainer.createComponent(factory, _this.defaultViewContainer.length, modalInjector);
+        this.componentUtils.instanciate(modalComponent_1.default, this.defaultViewContainer, modalInjector).then(function (modalRef) {
             dialogRef.modalRef = modalRef;
-            _this._dialogStack.push(dialogRef);
+            _this._onDialogAdd(dialogRef);
             dialogRef.onDestroy.subscribe(function () {
                 _this._onDialogDestroy(dialogRef);
             });
         });
         return dialogRef;
     };
+    Modal.prototype._onDialogAdd = function (dialogRef) {
+        this._dialogStack.push(dialogRef);
+        if (this._dialogStack.length === 1) {
+        }
+    };
     Modal.prototype._onDialogDestroy = function (dialogRef) {
         console.log("on dialog destroy !");
     };
+    Modal.prototype._showOverlay = function () {
+    };
+    Modal.prototype._removeOverlay = function () {
+    };
     Modal = __decorate([
         core_1.Injectable(), 
-        __metadata('design:paramtypes', [core_1.ComponentResolver, core_1.Injector])
+        __metadata('design:paramtypes', [ComponentUtils_1.default, core_1.Injector])
     ], Modal);
     return Modal;
 }());
